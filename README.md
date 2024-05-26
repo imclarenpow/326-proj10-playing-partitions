@@ -7,25 +7,25 @@ position, and a list of target positions. The starting position will never be on
 target positions. The output (to stdout) should be in standard form. Each scenario
 should be represented by the starting position, a blank line, the list of target positions,
 and then a single comment line which is one of the following:<br>
-'# WIN'<br>
-'# LOSE'<br>
-'# DRAW'<br>
+`# WIN`<br>
+`# LOSE`<br>
+`# DRAW`<br>
 indicating the outcome of the game from the starting position for the first player assuming that both players are trying to win if possible.<br>
 Example<br>
-'Input:'<br>
-'2 1'<br>
-'3'<br>
-'---'<br>
-'3 2 1'<br>
-'2 2 1 1'<br>
-'Output:'<br>
-'2 1'<br>
-'3'<br>
-'# DRAW'<br>
-'---'<br>
-'3 2 1'<br>
-'2 2 1 1'<br>
-'# WIN'<br>
+`Input:`<br>
+`2 1`<br>
+`3`<br>
+`---`<br>
+`3 2 1`<br>
+`2 2 1 1`<br>
+`Output:`<br>
+`2 1`<br>
+`3`<br>
+`# DRAW`<br>
+`---`<br>
+`3 2 1`<br>
+`2 2 1 1`<br>
+`# WIN`<br>
 In the first scenario, the legal moves are to (2, 1) (using the first column) or (1, 1, 1)
 (using the second column). But, the second move is bad since it allows an immediate
 win for the second player. So, the first player will “do nothing” and the game will be
