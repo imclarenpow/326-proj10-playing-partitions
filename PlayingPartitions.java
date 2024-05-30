@@ -40,7 +40,7 @@ public class PlayingPartitions{
             visited.put(finalPosition, 2);
             HashSet<ArrayList<Integer>> moves = makeAllReverseMoves(finalPosition);
             for(ArrayList<Integer> move : moves){
-                //System.out.println("final: " + finalPosition.toString() + " -> " + move.toString());
+                System.out.println("final: " + finalPosition.toString() + " -> " + move.toString());
                 processMove(move, scen, new ArrayList<>());
             }
         }
@@ -52,8 +52,6 @@ public class PlayingPartitions{
             }else if(visited.get(scen.initPosition) == 0){
                 System.out.println("# DRAW");
             }
-        }else{
-            System.out.println("# DRAW");
         }
     }
     // indicates if this move is a move to a final state (1) (happy), or if all moves before it are a moves to a final states (2) (sad), otherwise 0 (meh)
@@ -65,15 +63,16 @@ public class PlayingPartitions{
         if(initFound){
             return;
         }
-        if(visited.containsKey(current)){
-            //System.out.println("Current: "+ current.toString() + " is already in visited");
-            return;
-        }
         path.add(current);
         HashSet<ArrayList<Integer>> fMoves = makeAllMoves(current);
         int counter = 0;
         int sadPts = 0;
+        //for(ArrayList<Integer> p : path){
+           //System.out.print(p.toString() + " <- ");
+        //}
+        //System.out.println();
         //System.out.println("current: " + current.toString());
+        
         for(ArrayList<Integer> fMove : fMoves){
             if(visited.containsKey(fMove)){
                 if(visited.get(fMove) == 1){
@@ -87,9 +86,13 @@ public class PlayingPartitions{
             }
         }
         if(counter!=0 && counter == fMoves.size()){
-            //System.out.println(current.toString() + " -> sad");
+            System.out.println("All Moves Are Bad");
+            for(ArrayList<Integer> p : path){
+                System.out.print(p.toString() + " <- ");
+            }
+            System.out.println();
             visited.put(current, 2);
-        }else if(!visited.containsKey(current) && fMoves.contains(current) && sadPts > 0){
+        }else if(!visited.containsKey(current) && fMoves.contains(current)){
             //System.out.println(current.toString() + " -> meh");
             visited.put(current, 0);
         }
