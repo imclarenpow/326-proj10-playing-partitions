@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 public class PlayingPartitions{
     private static HashMap<ArrayList<Integer>, Integer> visited = new HashMap<>();
     private static boolean initFound = false;
+    private static int biggestFerrerLine = 0;
     public static void main(String[] args){
         System.setErr(System.out);
         ArrayList<Scenario> scenarios = stdin();
@@ -20,6 +21,7 @@ public class PlayingPartitions{
                 System.out.println();
             }
             if(isValidScenario(scenario)){
+                biggestFerrerLineFinder(scenario);
                 play(scenario);
             }else{
                 System.out.println("Invalid scenario");
@@ -27,14 +29,13 @@ public class PlayingPartitions{
             visited = new HashMap<>();
             initFound = false;
             if(scenarios.indexOf(scenario) < scenarios.size()-1){
-                System.out.println("---");
+                System.out.println("--------");
             }
             
         }
     }
 
     public static void play(Scenario scen){
-        //HashMap<ArrayList<Integer>, Integer> visited = new HashMap<>();
         for(ArrayList<Integer> finalPosition : scen.finalPositions){
             visited.put(finalPosition, 2);
             HashSet<ArrayList<Integer>> moves = makeAllReverseMoves(finalPosition);
@@ -48,6 +49,8 @@ public class PlayingPartitions{
                 System.out.println("# WIN");
             }else if(visited.get(scen.initPosition) == 2){
                 System.out.println("# LOSE");
+            }else if(visited.get(scen.initPosition) == 0){
+                System.out.println("# DRAW");
             }
         }else{
             System.out.println("# DRAW");
@@ -79,44 +82,61 @@ public class PlayingPartitions{
                 if(visited.get(fMove) == 2){
                     sadPts++;
                     visited.put(current, 1);
-                    //System.out.println(current.toString() + " -> happy");
-                    break;
+                    //System.out.println(fMove.toString() + " -> sad " + current.toString() + " -> happy");
                 }
             }
         }
-        HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
-        if(counter == fMoves.size()){
+        if(counter!=0 && counter == fMoves.size()){
             //System.out.println(current.toString() + " -> sad");
             visited.put(current, 2);
-        }else if(!visited.containsKey(current) && fMoves.contains(current) && sadPts != 0){
+        }else if(!visited.containsKey(current) && fMoves.contains(current) && sadPts > 0){
             //System.out.println(current.toString() + " -> meh");
             visited.put(current, 0);
         }
         
+        HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
+        //System.out.println("rMoves amt: " + rMoves.size());
         for(ArrayList<Integer> rMove : rMoves){
-            if(!path.contains(rMove) && scen.initPosition.size() <= rMove.get(0) 
-            && rMove.get(0) <= scen.initPosition.get(0) 
-            && rMove.size() <= scen.initPosition.size()+scen.initPosition.get(scen.initPosition.size()-1)){
+            //System.out.println(rMove.toString());
+            if(!path.contains(rMove) && rMove.get(0) <= biggestFerrerLine 
+            && rMove.size() <= biggestFerrerLine){
                 processMove(rMove, scen, path);
             }
         }
         path.remove(current);
     }
 
-    public static HashSet<ArrayList<Integer>> makeAllMoves(ArrayList<Integer> current){
-        HashSet<ArrayList<Integer>> output = new HashSet<>();
-        for(int i = 0; i < current.size(); i++){
-            for(int j = 0; j < current.get(i); j++){
-                output.add(makeMove(current, i, j));
+    public static void biggestFerrerLineFinder(Scenario sc){
+        int temp = 0;
+        if(sc.initPosition.size() > temp){
+            temp = sc.initPosition.size();
+        }
+        if(sc.initPosition.get(0) > temp){
+            temp = sc.initPosition.get(0);
+        }
+        for(ArrayList<Integer> arr : sc.finalPositions){
+            if(arr.size() > temp){
+                temp = arr.size();
+            }
+            if(arr.get(0) > temp){
+                temp = arr.get(0);
             }
         }
+        biggestFerrerLine = temp;
+    }
+    public static HashSet<ArrayList<Integer>> makeAllMoves(ArrayList<Integer> current){
+        HashSet<ArrayList<Integer>> output = new HashSet<>();
+            for(int j = 0; j < current.get(0); j++){
+                output.add(makeMove(current, j));
+            }
         return output;
     }
     public static HashSet<ArrayList<Integer>> makeAllReverseMoves(ArrayList<Integer> current){
         HashSet<ArrayList<Integer>> output = new HashSet<>();
         for(int i = 0; i < current.size(); i++){
-                output.add(reverseMove(current, i));
+            output.add(reverseMove(current, i));
         }
+        //System.out.println(output.size() + " amt of r moves");
         return output;
     }
     public static ArrayList<Integer> reverseMove(ArrayList<Integer> current,
@@ -124,6 +144,7 @@ public class PlayingPartitions{
         
         ArrayList<Integer> newConfiguration = new ArrayList<>(current);
         int adding = newConfiguration.get(index);
+        //System.out.println(current.toString() + " removing: " + newConfiguration.get(index));
         newConfiguration.remove(index);
         for(int i = 0; i < adding; i++){
             if(i >= newConfiguration.size()){
@@ -132,23 +153,26 @@ public class PlayingPartitions{
                 newConfiguration.set(i, newConfiguration.get(i) + 1);
             }
         }
+        //System.out.println(newConfiguration.toString());
         return newConfiguration;
     }
     /* method that makes the specified move and returns an array */
     public static ArrayList<Integer> makeMove(ArrayList<Integer> current, 
-            int index, int sizeToMove) {
-        
+            int index) {
+        //System.out.println(current.toString() + " " + index);
         ArrayList<Integer> newConfiguration = new ArrayList<>(current);
         int newRow = 0;
         for (int i = 0; i < newConfiguration.size(); i++) {
-            if (newConfiguration.get(i) > sizeToMove) {
+            if (newConfiguration.get(i) > index) {
                 int temp = newConfiguration.get(i);
-                if (temp - 1 != 0) { newConfiguration.set(i, temp - 1); newRow++; }
+        //        System.out.println("index passed through - " + index + " temp - " + temp);
+                if (temp - 1 > 0) { newConfiguration.set(i, temp - 1); newRow++; }
                 else { newConfiguration.remove(i); newRow++; i--; }
             }
         }
         newConfiguration.add(newRow);
         Collections.sort(newConfiguration, Collections.reverseOrder());
+        //System.out.println("result: "+ newConfiguration.toString());
         return newConfiguration;
     }
 /* The following code handles input and scenarios */
