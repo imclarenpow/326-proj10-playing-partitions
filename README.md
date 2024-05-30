@@ -1,5 +1,18 @@
 # Playing Partitions
 ## Implementation
+Reads stdin via method, checks that a scenario is valid (i.e. are there the same number of points for all the final positions and the initial one)<br>
+then calls play() which checks the first moves back from the final points and adds to visited before calling the recursive method.<br>
+processMove() is the recursive method that adds values to the points once it has been affirmed what type they are.<br>
+utlilty methods include makeAllMoves which makes all moves for the current state<br>
+makeAllReverseMoves() finds all possible earlier moves<br>
+reverseMove() which is called by makeAllReverseMoves()<br>
+makeMove() which is called by makeAllMoves()<br>
+stdIn() and partitionHandler which make the data passed through readable to the program.<br>
+finally, isValidScenario, which checks that a scenario is valid before running the main method.<br>
+and this:<br>```if(!path.contains(rMove) && scen.initPosition.size() <= rMove.get(0) <br>
+            <t>&& rMove.get(0) <= scen.initPosition.get(0) <br>
+            <t>&& rMove.size() <= scen.initPosition.size()+scen.initPosition.get(scen.initPosition.size()-1))```
+which is important in pruning / not following unecessary paths to the initial.
 ## Task
 Write a program that takes input from stdin a data file formatted according to the rules
 of the Parsing Partitions étude where each scenario in the file will consist of a starting
@@ -10,7 +23,7 @@ and then a single comment line which is one of the following:<br>
 `# WIN`<br>
 `# LOSE`<br>
 `# DRAW`<br>
-indicating the outcome of the game from the starting position for the first player assuming that both players are trying to win if possible.<br>
+Indicating the outcome of the game from the starting position for the first player assuming that both players are trying to win if possible.<br>
 Example<br>
 `Input:`<br>
 `2 1`<br>
