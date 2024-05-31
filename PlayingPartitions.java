@@ -76,61 +76,76 @@ public class PlayingPartitions{
         for(ArrayList<Integer> finals : scen.finalPositions){
             //queue.add(finals);
             visited.put(finals, 2);
+            //System.out.println("finals: " + finals.toString() + " -> " + visited.get(finals));
             HashSet<ArrayList<Integer>> oneUp = makeAllReverseMoves(finals);
-            for(ArrayList<Integer> one : oneUp){
-                visited.put(one, 1);
-                queue.add(one);
+            for(ArrayList<Integer> oneUpMove : oneUp){
+                queue.add(oneUpMove);
+                visited.put(oneUpMove, 1);
             }
         }
         while(!queue.isEmpty()){
-            if(visited.containsKey(scen.initPosition)){
+            /*if(visited.containsKey(scen.initPosition)){
                 //System.out.println("value for init");
-                initFound = true;
                 return;
-            }            
+            }    */     
             ArrayList<Integer> current = queue.poll();
             HashSet<ArrayList<Integer>> fMoves = makeAllMoves(current);
             int counter = 0;
             int sadPts = 0;
-            int meh = 0;
+            int amt = 0;
+            //System.out.print("fwd moves from: " + current.toString() + " -> ");
+           
             for(ArrayList<Integer> fMove : fMoves){
+                //System.out.print(fMove.toString() + " ");
                 if(visited.containsKey(fMove)){
+                    amt++;
+                    
                     if(visited.get(fMove) == 1){
                         counter++;
                         //System.out.println(fMove.toString() + " is happy");
                     }
                     else if(visited.get(fMove) == 2){
                         sadPts++;
-                        if(!visited.containsKey(current) || (visited.containsKey(current) && visited.get(current) == 0)){
+                        if((!visited.containsKey(current) || visited.get(current) == 0)){
                             visited.put(current, 1);
+                            //continue;
                             //System.out.println(fMove.toString() + " -> sad " + current.toString() + " -> happy");
                         }
                         
-                    }else if(visited.get(fMove) == 0){
-                        meh ++;
                     }
+                }else{
+                    queue.add(fMove);
                 }
             }
+            //System.out.println();
+            HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
             if(counter!=0 && counter == fMoves.size() && (!visited.containsKey(current) || visited.get(current) == 0)){
                 //System.out.println("all moves happy so: " + current.toString() + " -> sad");
                 //System.out.println();
                 visited.put(current, 2);
-            }else if(!visited.containsKey(current) && fMoves.contains(current)){
+                for(ArrayList<Integer> rMove : rMoves){
+                    if(!scen.finalPositions.containsAll(rMove)){
+                        visited.put(rMove, 1);
+                    }
+                    
+                }
+            }else if(!visited.containsKey(current)){
                 //System.out.println(current.toString() + " -> meh");
                 visited.put(current, 0);
             }
-            HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
+            if(visited.containsKey(current)){
+                //System.out.println("current: " + current.toString() + " -> " + visited.get(current));
+            }else{
+                //System.out.println("current: " + current.toString() + " no value assigned");
+            }
+            //HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
             //System.out.println("rMoves amt: " + rMoves.size());
             //System.out.print("Adding to Queue: ");
-            if(rMoves.contains(scen.initPosition)){
-                queue.add(scen.initPosition);
-                continue;
-            }
+            
             for(ArrayList<Integer> rMove : rMoves){
                 //queue.add(rMove);
                 if(!queue.contains(rMove) && rMove.get(0) <= biggestFerrerLine 
-                && rMove.size() <= biggestFerrerLine && !visited.containsKey(rMove)){
-                    visited.put(rMove, 0);
+                && rMove.size() <= biggestFerrerLine && (!visited.containsKey(rMove)) && !scen.finalPositions.containsAll(rMove)){
                     queue.add(rMove);
                     //System.out.print(rMove.toString() + ", ");
                 }
