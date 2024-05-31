@@ -40,6 +40,9 @@ public class PlayingPartitions{
             }else{
                 System.out.println("# DRAW");
             }
+            //for(ArrayList<Integer> s : visited.keySet()){
+            //    System.out.println(s.toString() + " " + visited.get(s));
+            //}
             visited = new HashMap<>();
             if(scenarios.indexOf(scenario) < scenarios.size()-1){
                 System.out.println("--------");
@@ -51,7 +54,7 @@ public class PlayingPartitions{
         Queue<ArrayList<Integer>> queue = new LinkedList<>();
         for(ArrayList<Integer> finals : scen.finalPositions){
             visited.put(finals, 2);
-            HashSet<ArrayList<Integer>> oneUp = makeAllReverseMoves(finals);
+            HashSet<ArrayList<Integer>> oneUp = removeBadMoves(makeAllReverseMoves(finals));
             for(ArrayList<Integer> oneUpMove : oneUp){
                 queue.add(oneUpMove);
                 visited.put(oneUpMove, 1);
@@ -59,10 +62,14 @@ public class PlayingPartitions{
         }
         while(!queue.isEmpty()){   
             ArrayList<Integer> current = queue.poll();
-            HashSet<ArrayList<Integer>> fMoves = makeAllMoves(current);
+            HashSet<ArrayList<Integer>> fMoves = removeBadMoves(makeAllMoves(current));
             int counter = 0;
+
+            //System.out.println("Current: " + current.toString());
             for(ArrayList<Integer> fMove : fMoves){
+                //System.out.println("-> " + fMove.toString());
                 if(visited.containsKey(fMove)){
+                    //System.out.println("  value: " + visited.get(fMove));
                     if(visited.get(fMove) == 1){
                         counter++;
                     }
@@ -71,11 +78,13 @@ public class PlayingPartitions{
                             visited.put(current, 1);
                         }  
                     }
-                }else{
+                }else if(!queue.contains(fMove)){
                     queue.add(fMove);
+                    //System.out.println("Added to queue: " + fMove.toString());
                 }
             }
-            HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
+            HashSet<ArrayList<Integer>> rMoves = removeBadMoves(makeAllReverseMoves(current));
+            
             if(counter!=0 && counter == fMoves.size() && (!visited.containsKey(current) || visited.get(current) == 0)){
                 visited.put(current, 2);
                 for(ArrayList<Integer> rMove : rMoves){
@@ -87,15 +96,22 @@ public class PlayingPartitions{
                 visited.put(current, 0);
             }
             for(ArrayList<Integer> rMove : rMoves){
-                if(!queue.contains(rMove) && rMove.get(0) <= biggestFerrerLine 
-                && rMove.size() <= biggestFerrerLine && (!visited.containsKey(rMove)) && !scen.finalPositions.contains(rMove)){
+                if(!queue.contains(rMove) && (!visited.containsKey(rMove)) && !scen.finalPositions.contains(rMove)){
                     queue.add(rMove);
                 }
             }
         }
     }
 
-
+    public static HashSet<ArrayList<Integer>> removeBadMoves(HashSet<ArrayList<Integer>> moves){
+        HashSet<ArrayList<Integer>> goodMoves = new HashSet<>();
+        for(ArrayList<Integer> move : moves){
+            if(move.get(0) <= biggestFerrerLine && move.size() <= biggestFerrerLine){
+                goodMoves.add(move);
+            }
+        }
+        return goodMoves;
+    }
     public static void biggestFerrerLineFinder(Scenario sc){
         int temp = 0;
         if(sc.initPosition.size() > temp){
