@@ -40,6 +40,9 @@ public class PlayingPartitions{
             visited.put(finalPosition, 2);
             HashSet<ArrayList<Integer>> moves = makeAllReverseMoves(finalPosition);
             for(ArrayList<Integer> move : moves){
+                visited.put(move, 1);
+            }
+            for(ArrayList<Integer> move : moves){
                 System.out.println("final: " + finalPosition.toString() + " -> " + move.toString());
                 processMove(move, scen, new ArrayList<>());
             }
@@ -52,6 +55,8 @@ public class PlayingPartitions{
             }else if(visited.get(scen.initPosition) == 0){
                 System.out.println("# DRAW");
             }
+        }else{
+            System.out.println("# DRAW");
         }
     }
     // indicates if this move is a move to a final state (1) (happy), or if all moves before it are a moves to a final states (2) (sad), otherwise 0 (meh)
@@ -63,34 +68,39 @@ public class PlayingPartitions{
         if(initFound){
             return;
         }
+        if(path.contains(current)){
+            return;
+        }
         path.add(current);
         HashSet<ArrayList<Integer>> fMoves = makeAllMoves(current);
         int counter = 0;
         int sadPts = 0;
-        //for(ArrayList<Integer> p : path){
-           //System.out.print(p.toString() + " <- ");
-        //}
+        int meh = 0;
+        for(ArrayList<Integer> p : path){
+           System.out.print(p.toString() + " -> ");
+        }
         //System.out.println();
         //System.out.println("current: " + current.toString());
-        
         for(ArrayList<Integer> fMove : fMoves){
             if(visited.containsKey(fMove)){
                 if(visited.get(fMove) == 1){
                     counter++;
+                    //System.out.println(fMove.toString() + " is happy");
                 }
-                if(visited.get(fMove) == 2){
+                else if(visited.get(fMove) == 2){
                     sadPts++;
-                    visited.put(current, 1);
+                    if(!visited.containsKey(current) || (visited.containsKey(current) && visited.get(current) == 0)){
+                        visited.put(current, 1);
+                    }
                     //System.out.println(fMove.toString() + " -> sad " + current.toString() + " -> happy");
+                }else if(visited.get(fMove) == 0){
+                    meh ++;
                 }
             }
         }
-        if(counter!=0 && counter == fMoves.size()){
-            System.out.println("All Moves Are Bad");
-            for(ArrayList<Integer> p : path){
-                System.out.print(p.toString() + " <- ");
-            }
-            System.out.println();
+        if(counter!=0 && counter == fMoves.size() && !visited.containsKey(current)){
+            //System.out.println("all moves happy so " + current.toString() + " = sad");
+            //System.out.println();
             visited.put(current, 2);
         }else if(!visited.containsKey(current) && fMoves.contains(current)){
             //System.out.println(current.toString() + " -> meh");
@@ -99,13 +109,19 @@ public class PlayingPartitions{
         
         HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
         //System.out.println("rMoves amt: " + rMoves.size());
-        for(ArrayList<Integer> rMove : rMoves){
-            //System.out.println(rMove.toString());
-            if(!path.contains(rMove) && rMove.get(0) <= biggestFerrerLine 
-            && rMove.size() <= biggestFerrerLine){
-                processMove(rMove, scen, path);
+        if(rMoves.contains(scen.initPosition)){
+            //System.out.println("Next Move is Initial");
+            processMove(scen.initPosition, scen, path);
+        }else{
+            for(ArrayList<Integer> rMove : rMoves){
+
+                if(!path.contains(rMove) && rMove.get(0) <= biggestFerrerLine 
+                && rMove.size() <= biggestFerrerLine){
+                    processMove(rMove, scen, path);
+                }
             }
         }
+        
         path.remove(current);
     }
 
