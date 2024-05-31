@@ -99,9 +99,6 @@ public class PlayingPartitions{
                     visited.put(rMove, 1);
                 }
             }
-            if(visited.containsKey(scen.initPosition)){
-                return;
-            }
         }
     }
     public static void biggestFerrerLineFinder(Scenario sc){
