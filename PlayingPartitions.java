@@ -54,7 +54,7 @@ public class PlayingPartitions{
         Queue<ArrayList<Integer>> queue = new LinkedList<>();
         for(ArrayList<Integer> finals : scen.finalPositions){
             visited.put(finals, 2);
-            HashSet<ArrayList<Integer>> oneUp = removeBadMoves(makeAllReverseMoves(finals));
+            HashSet<ArrayList<Integer>> oneUp = makeAllReverseMoves(finals);
             for(ArrayList<Integer> oneUpMove : oneUp){
                 queue.add(oneUpMove);
                 visited.put(oneUpMove, 1);
@@ -62,7 +62,7 @@ public class PlayingPartitions{
         }
         while(!queue.isEmpty()){   
             ArrayList<Integer> current = queue.poll();
-            HashSet<ArrayList<Integer>> fMoves = removeBadMoves(makeAllMoves(current));
+            HashSet<ArrayList<Integer>> fMoves = makeAllMoves(current);
             int counter = 0;
 
             //System.out.println("Current: " + current.toString());
@@ -83,15 +83,11 @@ public class PlayingPartitions{
                     //System.out.println("Added to queue: " + fMove.toString());
                 }
             }
-            HashSet<ArrayList<Integer>> rMoves = removeBadMoves(makeAllReverseMoves(current));
-            
+            HashSet<ArrayList<Integer>> rMoves = makeAllReverseMoves(current);
+            boolean currSad = false;
             if(counter!=0 && counter == fMoves.size() && (!visited.containsKey(current) || visited.get(current) == 0)){
                 visited.put(current, 2);
-                for(ArrayList<Integer> rMove : rMoves){
-                    if(!scen.finalPositions.contains(rMove)){
-                        visited.put(rMove, 1);
-                    }                   
-                }
+                currSad=true;
             }else if(!visited.containsKey(current)){
                 visited.put(current, 0);
             }
@@ -99,18 +95,14 @@ public class PlayingPartitions{
                 if(!queue.contains(rMove) && (!visited.containsKey(rMove)) && !scen.finalPositions.contains(rMove)){
                     queue.add(rMove);
                 }
+                if(!scen.finalPositions.contains(rMove) && currSad){
+                    visited.put(rMove, 1);
+                }
+            }
+            if(visited.containsKey(scen.initPosition)){
+                return;
             }
         }
-    }
-
-    public static HashSet<ArrayList<Integer>> removeBadMoves(HashSet<ArrayList<Integer>> moves){
-        HashSet<ArrayList<Integer>> goodMoves = new HashSet<>();
-        for(ArrayList<Integer> move : moves){
-            if(move.get(0) <= biggestFerrerLine && move.size() <= biggestFerrerLine){
-                goodMoves.add(move);
-            }
-        }
-        return goodMoves;
     }
     public static void biggestFerrerLineFinder(Scenario sc){
         int temp = 0;
@@ -133,14 +125,20 @@ public class PlayingPartitions{
     public static HashSet<ArrayList<Integer>> makeAllMoves(ArrayList<Integer> current){
         HashSet<ArrayList<Integer>> output = new HashSet<>();
             for(int j = 0; j < current.get(0); j++){
-                output.add(makeMove(current, j));
+                ArrayList<Integer> move = makeMove(current, j);
+                if(move.get(0) <= biggestFerrerLine && move.size() <= biggestFerrerLine){
+                    output.add(move);
+                }
             }
         return output;
     }
     public static HashSet<ArrayList<Integer>> makeAllReverseMoves(ArrayList<Integer> current){
         HashSet<ArrayList<Integer>> output = new HashSet<>();
         for(int i = 0; i < current.size(); i++){
-            output.add(reverseMove(current, i));
+            ArrayList<Integer> move = reverseMove(current, i);
+            if(move.get(0) <= biggestFerrerLine && move.size() <= biggestFerrerLine){
+                output.add(move);
+            }
         }
         //System.out.println(output.size() + " amt of r moves");
         return output;
@@ -253,6 +251,8 @@ public class PlayingPartitions{
     }
     /** simple method that checks if a scenario is valid or not */
     public static boolean isValidScenario(Scenario scenario) {
+        // now accounts for empty scenarios
+        if(scenario.initPosition.isEmpty()){ return false; }
         int length = scenario.initPosition.stream().mapToInt(Integer::intValue).sum();
         for (ArrayList<Integer> finalPosition : scenario.finalPositions) {
             if (length != finalPosition.stream().mapToInt(Integer::intValue).sum()) {
